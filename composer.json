@@ -16,6 +16,6 @@
         "php": ">=7.4.0"
     },
     "autoload": {
-        "psr-4": { "KrystalCode\\SagePayments\\": "src/" }
+        "psr-4": { "KrystalCode\\SagePayments\\Sdk": "src/" }
     }
 }
