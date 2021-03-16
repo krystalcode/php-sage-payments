@@ -1,0 +1,21 @@
+{
+    "name": "krystalcode/php-sage-payments-sdk",
+    "type": "library",
+    "description": "PHP SDK for the Sage Payments Direct APIs (legacy Paya).",
+    "keywords": [],
+    "homepage": "https://github.com/krystalcode/php-sage-payments-sdk",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "authors": [
+        {
+            "name": "Dimitris Bozelos",
+            "email": "dbozelos@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4.0"
+    },
+    "autoload": {
+        "psr-4": { "KrystalCode\\SagePayments\\": "src/" }
+    }
+}
