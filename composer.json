@@ -1,5 +1,5 @@
 {
-    "name": "krystalcode/php-sage-payments-sdk",
+    "name": "krystalcode/sage-payments-sdk",
     "type": "library",
     "description": "PHP SDK for the Sage Payments Direct APIs (legacy Paya).",
     "keywords": [],
