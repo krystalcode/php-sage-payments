@@ -8,7 +8,9 @@ use KrystalCode\SagePayments\Sdk\DirectApi\Exception\InvalidConfigurationExcepti
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
@@ -115,6 +117,24 @@ abstract class ClientBase implements ClientInterface
     ): ?object {
         return $this->sendRequest(
             'GET',
+            $endpoint,
+            $query,
+            $headers,
+            $options
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function postRequest(
+        string $endpoint,
+        array $query = [],
+        array $headers = [],
+        array $options = []
+    ): ?object {
+        return $this->sendNonGuzzleRequest(
+            'POST',
             $endpoint,
             $query,
             $headers,
@@ -234,6 +254,229 @@ abstract class ClientBase implements ClientInterface
     ): ?object {
         $response_body = (string) $response->getBody();
 
+        // Some responses return an empty body. We still want to follow the API
+        // and return an empty object.
+        if (!$response_body) {
+            return new \stdClass();
+        }
+
+        return json_decode($response_body);
+    }
+
+    /**
+     * Sends a request to the Direct API without using Guzzle.
+     *
+     * For some reason POST requests are not accepted when send with Guzzle. We
+     * therefore make them using the method provided in the API PHP samples
+     * until we figure out why this happens.
+     *
+     * @param string $method
+     *     The method of the request e.g. GET, POST, PUT, DELETE.
+     * @param string $endpoint
+     *     The endpoint to send the request to.
+     * @param array $query
+     *     An associative array containing the query parameters for the request.
+     * @param array $headers
+     *     An associative array containing the headers for the request.
+     * @param array $options
+     *     An associative array containing the options for the request.
+     *     Supported options are:
+     *     json: An array containing the body of the request.
+     *
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *     If the request was unsuccessful.
+     *
+     * @I Use Guzzle for POST requests
+     *    type     : task
+     *    priority : normal
+     *    labels   : request
+     * @I Support retries for POST requests
+     *    type     : bug
+     *    priority : normal
+     *    labels   : request
+     */
+    protected function sendNonGuzzleRequest(
+        string $method,
+        string $endpoint,
+        array $query = [],
+        array $headers = [],
+        array $options = []
+    ): ?object {
+        $url = $this->baseUrl() . '/' . $this->basePath() . '/' . $endpoint;
+        $options = $this->requestOptions(
+            $method,
+            $url,
+            $query,
+            $headers,
+            $options
+        );
+
+        $header = [];
+        foreach ($options['headers'] as $key => $value) {
+            $header[] = "{$key}: {$value}";
+        }
+        $config = [
+            'http' => [
+                'header' => $header,
+                'method' => $method,
+                'content' => json_encode($options['json']),
+                'ignore_errors' => true,
+            ],
+        ];
+
+        $context = stream_context_create($config);
+        $http_response_body = file_get_contents($url, false, $context);
+
+        // If `file_get_contents` fails we'll get `false`. We don't know what
+        // caused the failure.
+        if ($http_response_body === false) {
+            $http_response_body = '';
+            $http_response_header = [
+                'HTTP/1.1 504 Unknown Error'
+            ];
+        }
+        // If the remote server closes the connection for whatever reason, the
+        // variable containing the response headers will not exist. Simulate a
+        // timeout response.
+        // Not sure if this case is covered by handling a `false` response body
+        // above.
+        if (empty($http_response_header)) {
+            $http_response_header = [
+                'HTTP/1.1 504 Gateway Timeout'
+            ];
+        }
+
+        $this->handleNonGuzzleResponse(
+            $http_response_header,
+            $http_response_body,
+            $method,
+            $url,
+            $options['headers'],
+            $config['http']['content']
+        );
+
+        return $this->parseNonGuzzleResponse($http_response_body);
+    }
+
+    /**
+     * Detects and handles errors in non-Guzzle responses.
+     *
+     * @param array $http_response_header
+     *     The response headers.
+     * @param mixed $http_response_body
+     *    The response body.
+     * @param string $request_method.
+     *     The method of the request e.g. GET, POST, PUT, DELETE.
+     * @param string $url
+     *     The URL of the request.
+     * @param string $request_body
+     *     The JSON-encoded request body.
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *     If the request was unsuccessful.
+     */
+    protected function handleNonGuzzleResponse(
+        array $http_response_header,
+        $http_response_body,
+        string $request_method,
+        string $request_url,
+        array $request_headers,
+        $request_body
+    ): void {
+        [
+            $response_code,
+            $protocol_version,
+            $response_reason_phrase,
+        ] = $this->getNonGuzzleResponseCode($http_response_header);
+        if ($response_code < 400) {
+            return;
+        }
+
+        $request = new Request(
+            $request_method,
+            $request_url,
+            $request_headers,
+            $request_body
+        );
+        $response = new Response(
+            $response_code,
+            // @I Convert the headers array to Guzzle format
+            //    type     : improvement
+            //    priority : low
+            //    labels   : api, error-handling
+            $http_response_header,
+            $http_response_body,
+            $protocol_version,
+            $response_reason_phrase
+        );
+        throw RequestException::create(
+            $request,
+            $response
+        );
+    }
+
+    /**
+     * Returns the response code contained in the given response headers.
+     *
+     * The response headers multiple response codes if there have been any
+     * redirects. We return only the last one. We shouldn't really come across
+     * such scenario, but we let's handle it to avoid errors.
+     *
+     * @param array $http_response_header
+     *     The response headers.
+     *
+     * @return array
+     *     An array containing the following items in the given order:
+     *     - (int) The status code.
+     *     - (string) The HTTP protocol version.
+     *     - (string) The reason phrase.
+     */
+    protected function getNonGuzzleResponseCode(
+        array $http_response_header
+    ): array {
+        return end(array_reduce(
+            $http_response_header,
+            function ($carry, $header) {
+                $code = null;
+                $protocol_version = null;
+                $response_phrase = null;
+                if (preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $header, $matches)) {
+                    $code = intval($matches[1]);
+                    $parts = explode(' ', $header, 3);
+                    $protocol_version = explode('/', $parts[0])[1];
+                }
+                if (preg_match("#HTTP/[0-9\.]+\s+([0-9]+)+\s+(.*)#", $header, $matches)) {
+                    $reason_phrase = $matches[2];
+                }
+
+                if ($code) {
+                    $carry[] = [$code, $protocol_version, $reason_phrase];
+                }
+                return $carry;
+            },
+            []
+        ));
+    }
+
+    /**
+     * Parses and returns the response to a non-Guzzle request.
+     *
+     * It performs basic parsing of the response by decoding the JSON object
+     * into an \stdClass object.
+     *
+     * @param string $response_body
+     *     The JSON-encoded response body.
+     *
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
+     */
+    protected function parseNonGuzzleResponse(string $response_body): ?object
+    {
         // Some responses return an empty body. We still want to follow the API
         // and return an empty object.
         if (!$response_body) {
