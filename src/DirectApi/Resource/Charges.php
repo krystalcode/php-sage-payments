@@ -59,6 +59,30 @@ class Charges extends ClientBase
     }
 
     /**
+     * Captures an existing Auth charge.
+     *
+     * @param string $reference
+     *     The charge reference.
+     * @param array $charge
+     *     The details of the charge.
+     *
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
+     *
+     * @link https://developer.sagepayments.com/bankcard-ecommerce-moto/apis/put/charges/%7Breference%7D
+     */
+    public function putCharges($reference, array $charge): ?object
+    {
+        return $this->putRequest(
+            "charges/{$reference}",
+            [],
+            [],
+            ['json' => $charge]
+        );
+    }
+
+    /**
      * Validates that the given charge type is supported.
      *
      * @param string $type
