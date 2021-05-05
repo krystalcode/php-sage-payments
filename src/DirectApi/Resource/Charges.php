@@ -30,6 +30,23 @@ class Charges extends ClientBase
     public const CHARGE_TYPE_SALE = 'Sale';
 
     /**
+     * Returns detailed information for a charge.
+     *
+     * @param string $reference
+     *     The charge reference.
+     *
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
+     *
+     * @link https://developer.sagepayments.com/bankcard-ecommerce-moto/apis/get/charges/%7Breference%7D
+     */
+    public function getChargesDetail($reference): ?object
+    {
+        return $this->getRequest("charges/{$reference}");
+    }
+
+    /**
      * Creates a new charge.
      *
      * @param string $type
