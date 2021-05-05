@@ -143,6 +143,24 @@ abstract class ClientBase implements ClientInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function putRequest(
+        string $endpoint,
+        array $query = [],
+        array $headers = [],
+        array $options = []
+    ): ?object {
+        return $this->sendRequest(
+            'PUT',
+            $endpoint,
+            $query,
+            $headers,
+            $options
+        );
+    }
+
+    /**
      * Sends a request to the Direct API.
      *
      * @param string $method
