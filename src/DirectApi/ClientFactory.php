@@ -4,6 +4,7 @@ namespace KrystalCode\SagePayments\Sdk\DirectApi;
 
 use KrystalCode\SagePayments\Sdk\DirectApi\Resource\ApiHealth;
 use KrystalCode\SagePayments\Sdk\DirectApi\Resource\Charges;
+use KrystalCode\SagePayments\Sdk\DirectApi\Resource\Credits;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -49,6 +50,9 @@ class ClientFactory
 
             case Charges::ID:
                 return new Charges($this->logger, $config);
+
+            case Credits::ID:
+                return new Credits($this->logger, $config);
 
             default:
                 throw new \InvalidArgumentException(sprintf(
