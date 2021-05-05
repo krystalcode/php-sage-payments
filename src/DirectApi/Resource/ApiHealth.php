@@ -23,7 +23,7 @@ class ApiHealth extends ClientBase
      *
      * @link https://developer.sagepayments.com/bankcard-ecommerce-moto/apis/get/ping
      */
-    public function getPing(): object
+    public function getPing(): ?object
     {
         return $this->getRequest('ping');
     }
@@ -37,7 +37,7 @@ class ApiHealth extends ClientBase
      *
      * @link https://developer.sagepayments.com/bankcard-ecommerce-moto/apis/get/status
      */
-    public function getStatus(): object
+    public function getStatus(): ?object
     {
         return $this->getRequest('status');
     }
