@@ -161,6 +161,24 @@ abstract class ClientBase implements ClientInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function deleteRequest(
+        string $endpoint,
+        array $query = [],
+        array $headers = [],
+        array $options = []
+    ): ?object {
+        return $this->sendRequest(
+            'DELETE',
+            $endpoint,
+            $query,
+            $headers,
+            $options
+        );
+    }
+
+    /**
      * Sends a request to the Direct API.
      *
      * @param string $method

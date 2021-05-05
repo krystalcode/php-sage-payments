@@ -90,4 +90,32 @@ interface ClientInterface
         array $headers = [],
         array $options = []
     ): ?object;
+
+    /**
+     * Sends a DELETE request to the Direct API.
+     *
+     * @param string $endpoint
+     *     The endpoint to send the request to.
+     * @param array $query
+     *     An associative array containing the query parameters for the request.
+     * @param array $headers
+     *     An associative array containing the headers for the request.
+     * @param array $options
+     *     An associative array containing the options for the request.
+     *     Supported options are all request options supported by Guzzle.
+     *     See http://docs.guzzlephp.org/en/stable/request-options.html
+     *
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
+     *
+     * @throws \KrystalCode\SagePayments\Sdk\DirectApi\Exception\ClientException
+     *     If the request was unsuccessful due to a client error.
+     */
+    public function deleteRequest(
+        string $endpoint,
+        array $query = [],
+        array $headers = [],
+        array $options = []
+    ): ?object;
 }
