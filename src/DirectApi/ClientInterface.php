@@ -20,11 +20,6 @@ interface ClientInterface
      *     An associative array containing the options for the request.
      *     Supported options are all request options supported by Guzzle.
      *     See http://docs.guzzlephp.org/en/stable/request-options.html
-     * @param int $retry
-     *     The number of the request retry that we are currently at. Should be
-     *     normally left to the default (0, initial request); it will be
-     *     incremented on every retry based on the configuration passed to the
-     *     client.
      *
      * @return object|null
      *     The response as an \stdClass object, or null if the response could
@@ -37,7 +32,6 @@ interface ClientInterface
         string $endpoint,
         array $query = [],
         array $headers = [],
-        array $options = [],
-        int $retry = 0
+        array $options = []
     ): ?object;
 }

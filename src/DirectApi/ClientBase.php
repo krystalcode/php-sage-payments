@@ -111,16 +111,14 @@ abstract class ClientBase implements ClientInterface
         string $endpoint,
         array $query = [],
         array $headers = [],
-        array $options = [],
-        int $retry = 0
+        array $options = []
     ): ?object {
         return $this->sendRequest(
             'GET',
             $endpoint,
             $query,
             $headers,
-            $options,
-            $retry
+            $options
         );
     }
 
