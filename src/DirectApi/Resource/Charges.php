@@ -100,6 +100,26 @@ class Charges extends ClientBase
     }
 
     /**
+     * Deletes a charge; used to void or cancel a charge.
+     *
+     * Only charges that are not settled yet can be deleted. These are Auth
+     * charges or Sale charges that are in Batch i.e. waiting to be processed.
+     *
+     * @param string $reference
+     *     The charge reference.
+     *
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
+     *
+     * @link https://developer.sagepayments.com/bankcard-ecommerce-moto/apis/delete/charges/%7Breference%7D
+     */
+    public function deleteCharges($reference): ?object
+    {
+        return $this->deleteRequest("charges/{$reference}");
+    }
+
+    /**
      * Validates that the given charge type is supported.
      *
      * @param string $type
