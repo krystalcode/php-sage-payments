@@ -113,7 +113,7 @@ abstract class ClientBase implements ClientInterface
         array $headers = [],
         array $options = [],
         int $retry = 0
-    ): object {
+    ): ?object {
         return $this->sendRequest(
             'GET',
             $endpoint,
@@ -145,8 +145,9 @@ abstract class ClientBase implements ClientInterface
      *     incremented on every retry based on the configuration passed to the
      *     client.
      *
-     * @return object
-     *     The response as an \stdClass object.
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      *     If the request was unsuccessful.
@@ -163,7 +164,7 @@ abstract class ClientBase implements ClientInterface
         array $headers = [],
         array $options = [],
         int $retry = 0
-    ): object {
+    ): ?object {
         $client = $this->buildClient();
         $url = $this->baseUrl() . '/' . $this->basePath() . '/' . $endpoint;
         $request = new Request(
@@ -226,13 +227,13 @@ abstract class ClientBase implements ClientInterface
      *     The request.
      *
      * @return object|null
-     *     The response as an \stdClass object, or null if the response could not
-     *     be decoded.
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
      */
     protected function parseResponse(
         ResponseInterface $response,
         RequestInterface $request
-    ): object {
+    ): ?object {
         $response_body = (string) $response->getBody();
 
         // Some responses return an empty body. We still want to follow the API

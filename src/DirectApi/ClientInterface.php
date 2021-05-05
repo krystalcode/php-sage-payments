@@ -26,8 +26,9 @@ interface ClientInterface
      *     incremented on every retry based on the configuration passed to the
      *     client.
      *
-     * @return object
-     *     The response as an \stdClass object.
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
      *
      * @throws \KrystalCode\SagePayments\Sdk\DirectApi\Exception\ClientException
      *     If the request was unsuccessful due to a client error.
@@ -38,5 +39,5 @@ interface ClientInterface
         array $headers = [],
         array $options = [],
         int $retry = 0
-    ): object;
+    ): ?object;
 }
