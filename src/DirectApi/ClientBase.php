@@ -54,11 +54,6 @@ abstract class ClientBase implements ClientInterface
      * The client configuration array.
      *
      * @var array
-     *
-     * @I Document supported client configuration settings
-     *    type     : task
-     *    priority : normal
-     *    labels   : documentation
      */
     protected array $config;
 
@@ -87,8 +82,11 @@ abstract class ClientBase implements ClientInterface
      *     \KrystalCode\SagePaymentsSDK\DirectApi\ClientBase::config().
      * @param array $guzzleOptions
      *     An associative array containing the options to pass to the Guzzle
-     *     client.
-     *     For a list of supported options see \GuzzleHttp\Client::__construct().
+     *     client. For a list of supported options see 
+     *     \GuzzleHttp\Client::__construct().
+     *
+     * @throws \KrystalCode\SagePayments\Sdk\DirectApi\Exception\InvalidConfigurationException
+     *     If one or more required configuration items are missing.
      *
      * @see \KrystalCode\SagePaymentsSDK\DirectApi\ClientBase::config()
      * @see \GuzzleHttp\Client::__construct()
@@ -676,17 +674,18 @@ abstract class ClientBase implements ClientInterface
      * @param array $config
      *     The configuration array that was given by constructor injection.
      *     Supported options are:
-     *     client_id: (required) The Client ID.
-     *     client_secret: (required) The Client Secret.
-     *     merchant_id: (required) The Merchant ID.
-     *     merchant_key: (required) The Merchant Key.
-     *     base_url: (optional) An alternative base URL for all API endpoints.
-     *     debug: (optional) When `true` is given, all Guzzle requests will be
-     *         run with the debug option. Currently, this does not apply to POST
-     *         requests due to an issue preventing us from implementing them
-     *         using Guzzle.
-     *     retries: (optional) An associative array with options that will
-     *         determine whether to retry failed requests.
+     *     - client_id: (string, required) The Client ID.
+     *     - client_secret: (string, required) The Client Secret.
+     *     - merchant_id: (string, required) The Merchant ID.
+     *     - merchant_key: (string, required) The Merchant Key.
+     *     - base_url: (string, optional) An alternative base URL for all API
+     *         endpoints.
+     *     - debug: (bool, optional) When `true` is given, all Guzzle requests
+     *         will be run with the debug option. Currently, this does not apply
+     *         to `POST` requests due to an issue preventing us from
+     *         implementing them using Guzzle.
+     *     - retries: (array, optional) An associative array with options that
+     *         will determine whether to retry failed requests.
      *
      * @throws \KrystalCode\SagePayments\Sdk\DirectApi\Exception\InvalidConfigurationException
      *     If one or more required configuration items are missing.
