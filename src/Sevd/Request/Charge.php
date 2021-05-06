@@ -17,6 +17,16 @@ class Charge extends ClientBase
     public const ID = 'charge';
 
     /**
+     * The Capture transaction (charge) type.
+     */
+    protected const CHARGE_TYPE_CAPTURE = '11';
+
+    /**
+     * The Authorization transaction (charge) type.
+     */
+    protected const CHARGE_TYPE_AUTH = '12';
+
+    /**
      * Returns a tokenized request for a UI-enabled sale.
      *
      * @param array $transaction
@@ -190,7 +200,11 @@ class Charge extends ClientBase
             );
         }
 
-        $transaction_base->addChild('TransactionType', $capture ? '11' : '12');
+        $transaction_base->addChild(
+            'TransactionType',
+            $capture ? self::CHARGE_TYPE_CAPTURE : self::CHARGE_TYPE_AUTH
+        );
+
         $transaction_base->addChild('Reference1', $transaction['Reference1']);
         $transaction_base->addChild('Amount', $transaction['Amount']);
     }
