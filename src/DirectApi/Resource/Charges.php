@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace KrystalCode\SagePayments\Sdk\DirectApi\Resource;
 
 use KrystalCode\SagePayments\Sdk\DirectApi\ClientBase;
