@@ -82,7 +82,7 @@ abstract class ClientBase implements ClientInterface
      *     \KrystalCode\SagePaymentsSDK\DirectApi\ClientBase::config().
      * @param array $guzzleOptions
      *     An associative array containing the options to pass to the Guzzle
-     *     client. For a list of supported options see 
+     *     client. For a list of supported options see
      *     \GuzzleHttp\Client::__construct().
      *
      * @throws \KrystalCode\SagePayments\Sdk\DirectApi\Exception\InvalidConfigurationException
