@@ -541,7 +541,7 @@ abstract class ClientBase implements ClientInterface
         string $endpoint,
         int $status_code,
         int $retry
-    ): int {
+    ): bool {
         if (empty($this->config['retries'])) {
             return false;
         }
