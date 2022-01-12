@@ -45,4 +45,20 @@ class Credits extends ClientBase
             ['json' => $credit]
         );
     }
+
+    /**
+     * Returns detailed information for a credit.
+     *
+     * @param string $reference
+     *     The credit reference.
+     *
+     * @return object|null
+     *     The response as an \stdClass object, or null if the response could
+     *     not be decoded.
+     *
+     * @link https://developer.sagepayments.com/bankcard-ecommerce-moto/apis/get/credits/%7Breference%7D
+     */
+    public function getCreditsDetail($reference): ?object {
+        return $this->getRequest("credits/{$reference}");
+    }
 }
